@@ -1,5 +1,8 @@
 
 import { useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabase";
+import Login from "../Login";
 import {
   BookOpen,
   Brain,
@@ -854,11 +857,107 @@ function PlaceholderPage({ path }: { path: string }) {
   );
 }
 
+function AuthLoading({ message }: { message: string }) {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#050505",
+        color: "#c4b5fd",
+        fontSize: 16,
+      }}
+    >
+      {message}
+    </div>
+  );
+}
+
+function useAuthSession() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadSession = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (!mounted) return;
+
+      if (error) {
+        console.error("Session check failed:", error.message);
+      }
+
+      setSession(data.session);
+      setLoading(false);
+    };
+
+    void loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return { session, loading };
+}
+
+function ProtectedAppShell({
+  session,
+  loading,
+}: {
+  session: Session | null;
+  loading: boolean;
+}) {
+  if (loading) return <AuthLoading message="Loading JEE 360..." />;
+  if (!session) return <Navigate to="/" replace />;
+  return <AppShell />;
+}
+
 export default function App() {
+  const { session, loading } = useAuthSession();
+
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route element={<AppShell />}>
+      <Route
+        path="/"
+        element={
+          loading ? (
+            <AuthLoading message="Loading JEE 360..." />
+          ) : session ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Login />
+          )
+        }
+      />
+
+      <Route
+        path="/auth/callback"
+        element={
+          loading ? (
+            <AuthLoading message="Completing Google login..." />
+          ) : session ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      <Route
+        element={<ProtectedAppShell session={session} loading={loading} />}
+      >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/lecture" element={<PlaceholderPage path="/lecture" />} />
         <Route path="/group" element={<PlaceholderPage path="/group" />} />

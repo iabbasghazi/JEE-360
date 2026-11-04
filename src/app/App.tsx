@@ -1,5 +1,15 @@
-import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+} from 'react'
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom'
 import {
   Activity,
   ArrowRight,
@@ -13,7 +23,6 @@ import {
   Flame,
   FlaskConical,
   GraduationCap,
-  Leaf,
   MoreHorizontal,
   Play,
   Plus,
@@ -59,45 +68,74 @@ const subjects = [
   },
 ]
 
-const tasks = [
-  { title: 'Laws of Motion', subject: 'Physics', time: '25 min', done: true },
-  { title: 'Chemical Bonding', subject: 'Chemistry', time: '40 min', done: false },
-  { title: 'Practice: Sets', subject: 'Mathematics', time: '20 min', done: false },
+const initialTasks = [
+  {
+    title: 'Laws of Motion',
+    subject: 'Physics',
+    time: '25 min',
+  },
+  {
+    title: 'Chemical Bonding',
+    subject: 'Chemistry',
+    time: '40 min',
+  },
+  {
+    title: 'Practice: Sets',
+    subject: 'Mathematics',
+    time: '20 min',
+  },
 ]
 
-const pageDetails: Record<string, { title: string; description: string }> = {
+const pageDetails: Record<
+  string,
+  { title: string; description: string }
+> = {
   '/lecture': {
     title: 'Lectures',
-    description: 'Continue lessons and build concepts one lecture at a time.',
+    description:
+      'Continue lessons and build concepts one lecture at a time.',
   },
   '/group': {
     title: 'Study Group',
-    description: 'A place for study circles, accountability and shared goals.',
+    description:
+      'A place for study circles, accountability and shared goals.',
   },
   '/test': {
     title: 'Test Centre',
-    description: 'Practice questions and review your performance.',
+    description:
+      'Practice questions and review your performance.',
   },
   '/books': {
     title: 'Your Bookshelf',
-    description: 'Keep notes, modules and learning material in one place.',
+    description:
+      'Keep notes, modules and learning material in one place.',
   },
   '/analytics': {
     title: 'Your Analytics',
-    description: 'Understand your progress, consistency and focus areas.',
+    description:
+      'Understand your progress, consistency and focus areas.',
   },
   '/ai-teacher': {
     title: 'AI Teacher',
-    description: 'A future home for concept explanations and study help.',
+    description:
+      'A future home for concept explanations and study help.',
   },
   '/settings': {
     title: 'Settings',
-    description: 'Personalise your learning workspace.',
+    description:
+      'Personalise your learning workspace.',
+  },
+  '/profile': {
+    title: 'Your Profile',
+    description:
+      'Your learning identity and personal preferences.',
   },
 }
 
 function Dashboard() {
-  const [completedTasks, setCompletedTasks] = useState<string[]>(['Laws of Motion'])
+  const [completedTasks, setCompletedTasks] = useState<string[]>([
+    'Laws of Motion',
+  ])
 
   const toggleTask = (title: string) => {
     setCompletedTasks((current) =>
@@ -105,6 +143,10 @@ function Dashboard() {
         ? current.filter((task) => task !== title)
         : [...current, title],
     )
+  }
+
+  const goTo = (path: string) => {
+    window.location.href = path
   }
 
   return (
@@ -115,7 +157,11 @@ function Dashboard() {
             <Sparkles size={14} />
             YOUR NEXT LEVEL STARTS HERE
           </div>
-          <h1>Make today <span>count.</span></h1>
+
+          <h1>
+            Make today <span>count.</span>
+          </h1>
+
           <p className="page-subtitle">
             One focused session at a time. You’ve got this.
           </p>
@@ -124,7 +170,11 @@ function Dashboard() {
         <Button
           variant="secondary"
           icon={<CalendarDays size={17} />}
-          onClick={() => window.alert('Study planner will be added in a future phase.')}
+          onClick={() =>
+            window.alert(
+              'The study planner will be added in a future phase.',
+            )
+          }
         >
           Study planner
         </Button>
@@ -136,7 +186,13 @@ function Dashboard() {
 
         <div className="hero-content">
           <Badge tone="purple">YOUR DAILY MISSION</Badge>
-          <h2>Progress beats<br /> <span>perfection.</span></h2>
+
+          <h2>
+            Progress beats
+            <br />
+            <span>perfection.</span>
+          </h2>
+
           <p>
             Show up, stay curious, and keep moving forward.
             Your preparation is built one good day at a time.
@@ -145,14 +201,14 @@ function Dashboard() {
           <div className="hero-actions">
             <Button
               icon={<Play size={16} fill="currentColor" />}
-              onClick={() => {
-                window.location.href = '/lecture'
-              }}
+              onClick={() => goTo('/lecture')}
             >
               Continue learning
             </Button>
+
             <span className="hero-caption">
-              <Zap size={14} /> Focus on your next step
+              <Zap size={14} />
+              Focus on your next step
             </span>
           </div>
         </div>
@@ -160,32 +216,49 @@ function Dashboard() {
         <div className="hero-visual" aria-hidden="true">
           <div className="hero-visual__ring hero-visual__ring--outer" />
           <div className="hero-visual__ring hero-visual__ring--inner" />
+
           <div className="hero-visual__core">
             <GraduationCap size={47} strokeWidth={1.4} />
           </div>
+
           <span className="orbit-dot orbit-dot--one" />
           <span className="orbit-dot orbit-dot--two" />
           <span className="orbit-dot orbit-dot--three" />
+
           <div className="floating-chip floating-chip--top">
-            <Sparkles size={14} /> Keep going
+            <Sparkles size={14} />
+            Keep going
           </div>
+
           <div className="floating-chip floating-chip--bottom">
-            <Target size={14} /> One goal at a time
+            <Target size={14} />
+            One goal at a time
           </div>
         </div>
       </section>
 
-      <section className="stats-grid" aria-label="Learning overview">
+      <section
+        className="stats-grid"
+        aria-label="Learning overview"
+      >
         <Card className="stat-card">
           <div className="stat-card__top">
             <span className="stat-icon stat-icon--purple">
               <BookOpen size={18} />
             </span>
-            <span className="stat-trend"><ArrowUpRight size={14} /> TRACK</span>
+            <span className="stat-trend">
+              <ArrowUpRight size={14} />
+              TRACK
+            </span>
           </div>
+
           <p className="stat-label">Syllabus progress</p>
-          <div className="stat-value">— <span>to be synced</span></div>
-          <p className="stat-footnote">Connect your tracker data in a later step</p>
+          <div className="stat-value">
+            — <span>to be synced</span>
+          </div>
+          <p className="stat-footnote">
+            Connect your existing tracker in a later step.
+          </p>
         </Card>
 
         <Card className="stat-card">
@@ -195,9 +268,14 @@ function Dashboard() {
             </span>
             <span className="stat-trend">DAILY GOAL</span>
           </div>
+
           <p className="stat-label">Study time</p>
-          <div className="stat-value">— <span>minutes</span></div>
-          <p className="stat-footnote">Study-session tracking is not connected yet</p>
+          <div className="stat-value">
+            — <span>minutes</span>
+          </div>
+          <p className="stat-footnote">
+            Study-session tracking is not connected yet.
+          </p>
         </Card>
 
         <Card className="stat-card">
@@ -207,9 +285,14 @@ function Dashboard() {
             </span>
             <span className="stat-trend">CONSISTENCY</span>
           </div>
+
           <p className="stat-label">Study streak</p>
-          <div className="stat-value">— <span>days</span></div>
-          <p className="stat-footnote">Streaks will use verified activity</p>
+          <div className="stat-value">
+            — <span>days</span>
+          </div>
+          <p className="stat-footnote">
+            Streaks will use verified activity.
+          </p>
         </Card>
 
         <Card className="stat-card">
@@ -219,9 +302,14 @@ function Dashboard() {
             </span>
             <span className="stat-trend">GAMIFICATION</span>
           </div>
-          <p className="stat-label">XP & rank</p>
-          <div className="stat-value">— <span>not assigned</span></div>
-          <p className="stat-footnote">No fake rank or XP is shown</p>
+
+          <p className="stat-label">XP &amp; rank</p>
+          <div className="stat-value">
+            — <span>not assigned</span>
+          </div>
+          <p className="stat-footnote">
+            No fake rank or XP is shown.
+          </p>
         </Card>
       </section>
 
@@ -232,13 +320,13 @@ function Dashboard() {
               <div className="eyebrow">YOUR PREPARATION</div>
               <h2>Subject overview</h2>
             </div>
+
             <button
               className="text-link"
-              onClick={() => {
-                window.location.href = '/analytics'
-              }}
+              onClick={() => goTo('/analytics')}
             >
-              View analytics <ArrowRight size={15} />
+              View analytics
+              <ArrowRight size={15} />
             </button>
           </div>
 
@@ -247,31 +335,47 @@ function Dashboard() {
               const Icon = subject.icon
 
               return (
-                <Card key={subject.name} className={`subject-card ${subject.className}`}>
+                <Card
+                  key={subject.name}
+                  className={`subject-card ${subject.className}`}
+                >
                   <div className="subject-card__head">
                     <div className="subject-icon">
                       <Icon size={21} />
                     </div>
+
                     <button
                       className="icon-button"
                       aria-label={`More options for ${subject.name}`}
-                      onClick={() => window.alert('Subject details will be connected later.')}
+                      onClick={() =>
+                        window.alert(
+                          `${subject.name} details will be connected later.`,
+                        )
+                      }
                     >
                       <MoreHorizontal size={19} />
                     </button>
                   </div>
 
                   <h3>{subject.name}</h3>
-                  <p className="subject-subtitle">{subject.subtitle}</p>
+                  <p className="subject-subtitle">
+                    {subject.subtitle}
+                  </p>
 
                   <div className="subject-progress-label">
                     <span>Sample progress preview</span>
                     <strong>{subject.progress}%</strong>
                   </div>
-                  <ProgressBar value={subject.progress} showValue={false} />
+
+                  <ProgressBar
+                    value={subject.progress}
+                    showValue={false}
+                  />
 
                   <div className="subject-card__bottom">
-                    <span>{subject.completed} / {subject.total} topics</span>
+                    <span>
+                      {subject.completed} / {subject.total} topics
+                    </span>
                     <ArrowUpRight size={16} />
                   </div>
                 </Card>
@@ -283,15 +387,23 @@ function Dashboard() {
             <div className="insight-icon">
               <BrainCircuit size={22} />
             </div>
+
             <div className="insight-copy">
               <Badge tone="blue">COMING NEXT</Badge>
+
               <h3>Your personal learning insights</h3>
+
               <p>
-                Once your own study data is connected, JEE 360 can help
-                identify weak topics and suggest what to revise next.
+                Once your own study data is connected, JEE 360 can
+                help identify weak topics and suggest what to revise
+                next.
               </p>
             </div>
-            <ArrowRight className="insight-arrow" size={19} />
+
+            <ArrowRight
+              className="insight-arrow"
+              size={19}
+            />
           </Card>
         </div>
 
@@ -302,34 +414,48 @@ function Dashboard() {
                 <div className="eyebrow">MAKE IT HAPPEN</div>
                 <h2>Daily checklist</h2>
               </div>
+
               <span className="checklist-count">
-                {completedTasks.length}/{tasks.length}
+                {completedTasks.length}/{initialTasks.length}
               </span>
             </div>
 
             <ProgressBar
-              value={(completedTasks.length / tasks.length) * 100}
+              value={
+                (completedTasks.length / initialTasks.length) * 100
+              }
               showValue={false}
             />
 
             <div className="task-list">
-              {tasks.map((task) => {
+              {initialTasks.map((task) => {
                 const isDone = completedTasks.includes(task.title)
 
                 return (
                   <button
                     key={task.title}
-                    className={`task-item ${isDone ? 'task-item--done' : ''}`}
+                    className={`task-item ${
+                      isDone ? 'task-item--done' : ''
+                    }`}
+                    aria-pressed={isDone}
                     onClick={() => toggleTask(task.title)}
                   >
                     <span className="task-check">
                       {isDone && <CheckCircle2 size={18} />}
                     </span>
+
                     <span className="task-copy">
                       <strong>{task.title}</strong>
-                      <span>{task.subject} · {task.time}</span>
+                      <span>
+                        {task.subject} · {task.time}
+                      </span>
                     </span>
-                    {isDone && <span className="task-done-label">DONE</span>}
+
+                    {isDone && (
+                      <span className="task-done-label">
+                        DONE
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -339,7 +465,11 @@ function Dashboard() {
               variant="secondary"
               className="full-width"
               icon={<Plus size={16} />}
-              onClick={() => window.alert('Custom tasks will be saved when the planner is built.')}
+              onClick={() =>
+                window.alert(
+                  'Custom tasks will be saved when the study planner is built.',
+                )
+              }
             >
               Add a task
             </Button>
@@ -350,13 +480,17 @@ function Dashboard() {
               <div className="stat-icon stat-icon--purple">
                 <Zap size={18} />
               </div>
+
               <Badge tone="green">A LITTLE EVERY DAY</Badge>
             </div>
+
             <h3>Protect your focus.</h3>
+
             <p>
-              Try one distraction-free study block. Consistency is a skill
-              you can train.
+              Try one distraction-free study block. Consistency is
+              a skill you can train.
             </p>
+
             <div className="focus-quote">
               <span>“</span>
               The secret is to begin.
@@ -367,41 +501,59 @@ function Dashboard() {
             <div className="exam-note__icon">
               <CalendarDays size={19} />
             </div>
+
             <div>
               <strong>Exam countdowns</strong>
-              <p>Official dates will be configurable after verification.</p>
+              <p>
+                Official dates will be configurable after verification.
+              </p>
             </div>
           </Card>
         </aside>
       </section>
 
       <footer className="page-footer">
-        <span>JEE 360 <span className="footer-dot">·</span> Built for your next chapter.</span>
+        <span>
+          JEE 360 <span className="footer-dot">·</span>
+          Built for your next chapter.
+        </span>
+
         <span>Created by Ghazi Abbas</span>
       </footer>
     </div>
   )
 }
 
-function PlaceholderPage({ title, description }: { title: string; description: string }) {
+function PlaceholderPage({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
   return (
     <div className="placeholder-page">
       <div className="placeholder-art">
         <div className="placeholder-art__glow" />
         <Sparkles size={34} />
       </div>
+
       <Badge tone="purple">FOUNDATION PHASE</Badge>
+
       <h1>{title}</h1>
       <p>{description}</p>
+
       <Card className="placeholder-note">
         <div className="placeholder-note__icon">
           <CheckCircle2 size={20} />
         </div>
+
         <div>
           <strong>This route is ready for development.</strong>
           <p>
-            Its real features and student data will be connected in later phases.
-            This preview does not claim that the feature is already operational.
+            Real features and student data will be connected in
+            later phases. This preview does not claim that the
+            feature is already operational.
           </p>
         </div>
       </Card>
@@ -411,7 +563,11 @@ function PlaceholderPage({ title, description }: { title: string; description: s
 
 export default function App() {
   const location = useLocation()
-  const [pointer, setPointer] = useState({ x: 50, y: 25 })
+
+  const [pointer, setPointer] = useState({
+    x: 50,
+    y: 25,
+  })
 
   useEffect(() => {
     const onPointerMove = (event: PointerEvent) => {
@@ -421,27 +577,41 @@ export default function App() {
       })
     }
 
-    window.addEventListener('pointermove', onPointerMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointermove', onPointerMove, {
+      passive: true,
+    })
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove)
+    }
   }, [])
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    window.scrollTo({
+      top: 0,
+      behavior: 'auto',
+    })
   }, [location.pathname])
 
   return (
     <div
       className="app-root"
-      style={{
-        '--pointer-x': `${pointer.x}%`,
-        '--pointer-y': `${pointer.y}%`,
-      } as React.CSSProperties}
+      style={
+        {
+          '--pointer-x': `${pointer.x}%`,
+          '--pointer-y': `${pointer.y}%`,
+        } as CSSProperties
+      }
     >
       <div className="ambient-glow" aria-hidden="true" />
 
       <Routes>
+        <Route
+          path="/"
+          element={<Navigate to="/dashboard" replace />}
+        />
+
         <Route element={<AppShell />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
 
           {Object.entries(pageDetails).map(([path, details]) => (

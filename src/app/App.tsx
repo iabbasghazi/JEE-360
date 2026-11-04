@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import Login from "../Login";
+import ProfileSetup from "./ProfileSetup";
 import {
   BookOpen,
   Brain,
@@ -106,7 +107,7 @@ const styles = `
     font-family: Inter, ui-sans-serif, system-ui, -apple-system,
       BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
-  button, input { font: inherit; }
+  button, input, select { font: inherit; }
   button { cursor: pointer; }
   a { color: inherit; text-decoration: none; }
   .app { min-height: 100vh; background: #08080b; }
@@ -755,21 +756,13 @@ function Dashboard() {
               <CalendarDays size={18} color="#a78bfa" />
             </div>
             <div className="countdown-grid">
-              <div className="countdown">
-                <div className="countdown-label">JEE Main</div>
-                <div className="countdown-value">—</div>
-                <div className="countdown-note">Date not configured</div>
-              </div>
-              <div className="countdown">
-                <div className="countdown-label">JEE Advanced</div>
-                <div className="countdown-value">—</div>
-                <div className="countdown-note">Date not configured</div>
-              </div>
-              <div className="countdown">
-                <div className="countdown-label">NEET UG</div>
-                <div className="countdown-value">—</div>
-                <div className="countdown-note">Date not configured</div>
-              </div>
+              {["JEE Main", "JEE Advanced", "NEET UG"].map((exam) => (
+                <div className="countdown" key={exam}>
+                  <div className="countdown-label">{exam}</div>
+                  <div className="countdown-value">—</div>
+                  <div className="countdown-note">Date not configured</div>
+                </div>
+              ))}
             </div>
           </section>
         </div>
@@ -915,29 +908,89 @@ function useAuthSession() {
 function ProtectedAppShell({
   session,
   loading,
+  profileComplete,
+  profileLoading,
 }: {
   session: Session | null;
   loading: boolean;
+  profileComplete: boolean;
+  profileLoading: boolean;
 }) {
-  if (loading) return <AuthLoading message="Loading JEE 360..." />;
+  if (loading || (session && profileLoading)) {
+    return <AuthLoading message="Loading JEE 360..." />;
+  }
+
   if (!session) return <Navigate to="/" replace />;
+
+  if (!profileComplete) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return <AppShell />;
 }
 
 export default function App() {
   const { session, loading } = useAuthSession();
 
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfileStatus() {
+      if (loading) return;
+
+      if (!session) {
+        setProfileComplete(false);
+        setProfileLoading(false);
+        return;
+      }
+
+      setProfileLoading(true);
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Profile status check failed:", error.message);
+      }
+
+      setProfileComplete(
+        !error && data?.onboarding_completed === true
+      );
+      setProfileLoading(false);
+    }
+
+    void loadProfileStatus();
+
+    return () => {
+      active = false;
+    };
+  }, [session?.user.id, loading]);
+
+  if (loading) {
+    return <AuthLoading message="Loading JEE 360..." />;
+  }
+
   return (
     <Routes>
       <Route
         path="/"
         element={
-          loading ? (
-            <AuthLoading message="Loading JEE 360..." />
-          ) : session ? (
+          !session ? (
+            <Login />
+          ) : profileLoading ? (
+            <AuthLoading message="Checking your profile..." />
+          ) : profileComplete ? (
             <Navigate to="/dashboard" replace />
           ) : (
-            <Login />
+            <Navigate to="/onboarding" replace />
           )
         }
       />
@@ -945,18 +998,45 @@ export default function App() {
       <Route
         path="/auth/callback"
         element={
-          loading ? (
+          !session ? (
+            <Navigate to="/" replace />
+          ) : profileLoading ? (
             <AuthLoading message="Completing Google login..." />
-          ) : session ? (
+          ) : profileComplete ? (
             <Navigate to="/dashboard" replace />
           ) : (
-            <Navigate to="/" replace />
+            <Navigate to="/onboarding" replace />
           )
         }
       />
 
       <Route
-        element={<ProtectedAppShell session={session} loading={loading} />}
+        path="/onboarding"
+        element={
+          !session ? (
+            <Navigate to="/" replace />
+          ) : profileLoading ? (
+            <AuthLoading message="Checking your profile..." />
+          ) : profileComplete ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <ProfileSetup
+              userId={session.user.id}
+              onComplete={() => setProfileComplete(true)}
+            />
+          )
+        }
+      />
+
+      <Route
+        element={
+          <ProtectedAppShell
+            session={session}
+            loading={loading}
+            profileComplete={profileComplete}
+            profileLoading={profileLoading}
+          />
+        }
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/lecture" element={<PlaceholderPage path="/lecture" />} />

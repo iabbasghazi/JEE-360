@@ -1936,3 +1936,12 @@ h3 {
     display: none;
   }
 }
+
+.auth-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #050505;
+  color: #c4b5fd;
+  font-size: 16px;
+}

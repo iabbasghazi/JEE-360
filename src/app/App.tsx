@@ -1,643 +1,860 @@
 
+import { useEffect, useState } from "react";
 import {
-  useEffect,
-  useState,
-  type CSSProperties,
-} from 'react'
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom'
-import {
-  Activity,
-  ArrowRight,
-  ArrowUpRight,
-  Atom,
+  Browser,
   BookOpen,
-  BrainCircuit,
-  CalendarDays,
-  CheckCircle2,
+  Brain,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  CircleHelp,
   Clock3,
   Flame,
   FlaskConical,
   GraduationCap,
+  Home,
+  LogOut,
+  Menu,
+  Moon,
   MoreHorizontal,
   Play,
   Plus,
+  Search,
+  Settings,
+  ShieldCheck,
   Sparkles,
   Target,
   Trophy,
+  UserRound,
+  Users,
+  X,
   Zap,
-} from 'lucide-react'
+  BarChart3,
+  CalendarDays,
+  Atom,
+  Calculator,
+  BookMarked,
+  Bell,
+} from "lucide-react";
+import {
+  Navigate,
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
-import { AppShell } from '../components/layout/AppShell'
-import { Button } from '../components/ui/Button'
-import { Card } from '../components/ui/Card'
-import { Badge } from '../components/ui/Badge'
-import { ProgressBar } from '../components/ui/ProgressBar'
+type Subject = {
+  name: string;
+  subtitle: string;
+  progress: number;
+  completed: number;
+  total: number;
+  icon: typeof Atom;
+  color: string;
+  background: string;
+};
 
-const subjects = [
+const subjects: Subject[] = [
   {
-    name: 'Physics',
-    subtitle: 'Build your intuition',
+    name: "Physics",
+    subtitle: "Concepts & numericals",
+    progress: 35,
+    completed: 14,
+    total: 40,
     icon: Atom,
-    className: 'subject-card--physics',
-    progress: 68,
-    completed: 34,
-    total: 50,
+    color: "#a78bfa",
+    background: "rgba(167,139,250,.12)",
   },
   {
-    name: 'Chemistry',
-    subtitle: 'Master the reactions',
+    name: "Chemistry",
+    subtitle: "Build your fundamentals",
+    progress: 48,
+    completed: 19,
+    total: 40,
     icon: FlaskConical,
-    className: 'subject-card--chemistry',
-    progress: 42,
-    completed: 21,
-    total: 50,
+    color: "#67e8c0",
+    background: "rgba(103,232,192,.10)",
   },
   {
-    name: 'Mathematics',
-    subtitle: 'Solve with confidence',
-    icon: Target,
-    className: 'subject-card--maths',
-    progress: 56,
-    completed: 28,
-    total: 50,
+    name: "Mathematics",
+    subtitle: "Practice makes perfect",
+    progress: 26,
+    completed: 10,
+    total: 38,
+    icon: Calculator,
+    color: "#fbbf77",
+    background: "rgba(251,191,119,.11)",
   },
-]
+];
 
-const initialTasks = [
-  {
-    title: 'Laws of Motion',
-    subject: 'Physics',
-    time: '25 min',
-  },
-  {
-    title: 'Chemical Bonding',
-    subject: 'Chemistry',
-    time: '40 min',
-  },
-  {
-    title: 'Practice: Sets',
-    subject: 'Mathematics',
-    time: '20 min',
-  },
-]
+const navigation = [
+  { label: "Dashboard", path: "/dashboard", icon: Home },
+  { label: "Lectures", path: "/lecture", icon: Play },
+  { label: "Study Group", path: "/group", icon: Users },
+  { label: "Test Centre", path: "/test", icon: Target },
+  { label: "Books & Notes", path: "/books", icon: BookOpen },
+  { label: "Analytics", path: "/analytics", icon: BarChart3 },
+  { label: "AI Teacher", path: "/ai-teacher", icon: Brain },
+];
 
-const pageDetails: Record<
-  string,
-  { title: string; description: string }
-> = {
-  '/lecture': {
-    title: 'Lectures',
-    description:
-      'Continue lessons and build concepts one lecture at a time.',
-  },
-  '/group': {
-    title: 'Study Group',
-    description:
-      'A place for study circles, accountability and shared goals.',
-  },
-  '/test': {
-    title: 'Test Centre',
-    description:
-      'Practice questions and review your performance.',
-  },
-  '/books': {
-    title: 'Your Bookshelf',
-    description:
-      'Keep notes, modules and learning material in one place.',
-  },
-  '/analytics': {
-    title: 'Your Analytics',
-    description:
-      'Understand your progress, consistency and focus areas.',
-  },
-  '/ai-teacher': {
-    title: 'AI Teacher',
-    description:
-      'A future home for concept explanations and study help.',
-  },
-  '/settings': {
-    title: 'Settings',
-    description:
-      'Personalise your learning workspace.',
-  },
-  '/profile': {
-    title: 'Your Profile',
-    description:
-      'Your learning identity and personal preferences.',
-  },
+const styles = `
+  * { box-sizing: border-box; }
+  :root { color-scheme: dark; }
+  body {
+    margin: 0;
+    background: #08080b;
+    color: #f5f3ff;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  .app { min-height: 100vh; background: #08080b; }
+  .glow {
+    pointer-events: none;
+    position: fixed;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    background: rgba(124, 58, 237, .10);
+    filter: blur(90px);
+    transform: translate(-50%, -50%);
+    z-index: 0;
+  }
+  .layout { position: relative; z-index: 1; min-height: 100vh; }
+  .sidebar {
+    width: 248px;
+    position: fixed;
+    inset: 0 auto 0 0;
+    background: rgba(12, 12, 17, .96);
+    border-right: 1px solid #24232d;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 28px; }
+  .brand-mark {
+    width: 42px; height: 42px; border-radius: 14px;
+    display: grid; place-items: center;
+    background: linear-gradient(145deg, #a78bfa, #6d28d9);
+    color: white; box-shadow: 0 6px 28px #7c3aed33;
+  }
+  .brand-name { font-size: 17px; font-weight: 850; letter-spacing: 1.6px; }
+  .brand-caption { font-size: 11px; color: #9290a3; margin-top: 3px; }
+  .nav-caption {
+    color: #747184; font-size: 10px; font-weight: 800;
+    letter-spacing: 1.6px; padding: 8px 12px 10px;
+  }
+  .nav-list { display: grid; gap: 5px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    min-height: 44px; padding: 0 12px; border-radius: 12px;
+    color: #a5a2b5; font-size: 13px; font-weight: 600;
+    transition: .2s ease;
+  }
+  .nav-link:hover { background: #191821; color: white; }
+  .nav-link.active {
+    background: linear-gradient(90deg, #8b5cf622, #8b5cf609);
+    color: #c4b5fd; border: 1px solid #8b5cf62b;
+  }
+  .nav-link.active svg { color: #a78bfa; }
+  .side-bottom { margin-top: auto; }
+  .profile-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 8px 2px; border-top: 1px solid #25242d;
+    margin-top: 20px;
+  }
+  .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0;
+    background: linear-gradient(145deg, #7c3aed, #312e81);
+    border: 1px solid #a78bfa55; color: white; font-weight: 800;
+  }
+  .profile-name { font-size: 12px; font-weight: 700; }
+  .profile-role { font-size: 11px; color: #858295; margin-top: 3px; }
+  .main { margin-left: 248px; min-width: 0; }
+  .topbar {
+    height: 76px; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px;
+    padding: 0 34px; border-bottom: 1px solid #22212a;
+    background: rgba(8,8,11,.72); backdrop-filter: blur(16px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .crumb { font-size: 13px; color: #9996a9; }
+  .crumb strong { color: #f4f0ff; }
+  .top-actions { display: flex; align-items: center; gap: 10px; }
+  .searchbox {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 12px; border: 1px solid #292834;
+    background: #111117; border-radius: 12px;
+    color: #8d899f; width: 220px; font-size: 12px;
+  }
+  .icon-btn {
+    width: 38px; height: 38px; display: grid; place-items: center;
+    color: #aaa6bc; background: #121118; border: 1px solid #292834;
+    border-radius: 12px;
+  }
+  .icon-btn:hover { color: white; border-color: #6d28d9; }
+  .content { max-width: 1500px; padding: 32px 34px 20px; margin: auto; }
+  .eyebrow {
+    display: flex; align-items: center; gap: 7px; color: #b8a4ff;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .page-title { font-size: clamp(25px, 3vw, 34px); line-height: 1.2; margin: 10px 0 8px; letter-spacing: -1.2px; }
+  .muted { color: #9692a7; font-size: 13px; line-height: 1.7; }
+  .hero {
+    margin-top: 26px; padding: 28px; border-radius: 22px;
+    border: 1px solid #393044;
+    background: radial-gradient(ellipse at 90% 0%, #6d28d933, transparent 45%),
+      linear-gradient(115deg, #191320, #101015 65%);
+    position: relative; overflow: hidden;
+  }
+  .hero:after {
+    content: ""; position: absolute; width: 210px; height: 210px;
+    border: 1px solid #a78bfa20; border-radius: 50%;
+    right: -48px; top: -72px; box-shadow: 0 0 0 24px #a78bfa08, 0 0 0 48px #a78bfa05;
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 670px; }
+  .hero h2 { font-size: clamp(23px, 3vw, 31px); margin: 14px 0 10px; letter-spacing: -.9px; }
+  .hero p { color: #b2acbf; font-size: 13px; line-height: 1.8; max-width: 570px; }
+  .button-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    border: 0; padding: 12px 16px; border-radius: 12px;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    color: white; font-size: 12px; font-weight: 800;
+    box-shadow: 0 6px 22px #7c3aed30;
+  }
+  .button-primary:hover { filter: brightness(1.1); }
+  .button-secondary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid #34313f; padding: 11px 14px; border-radius: 12px;
+    background: #15141c; color: #d6d1e3; font-size: 12px; font-weight: 700;
+  }
+  .button-secondary:hover { border-color: #8b5cf6; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; margin-top: 20px; }
+  .panel {
+    background: linear-gradient(145deg, #14131a, #101015);
+    border: 1px solid #292733; border-radius: 17px; padding: 18px;
+    min-width: 0;
+  }
+  .stat-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .stat-icon {
+    width: 38px; height: 38px; border-radius: 12px;
+    display: grid; place-items: center;
+  }
+  .stat-label { color: #a09bae; font-size: 12px; margin-top: 15px; }
+  .stat-value { font-size: 25px; font-weight: 800; letter-spacing: -.8px; margin-top: 5px; }
+  .stat-note { color: #8e8a9d; font-size: 10px; margin-top: 7px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 30px 0 15px; }
+  .section-head h3 { font-size: 16px; margin: 0; letter-spacing: -.3px; }
+  .section-head p { margin: 5px 0 0; font-size: 11px; color: #8d899f; }
+  .text-link { border: 0; background: transparent; color: #b8a4ff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+  .subject-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+  .subject-head { display: flex; align-items: center; gap: 11px; }
+  .subject-icon { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; }
+  .subject-title { font-size: 13px; font-weight: 800; }
+  .subject-sub { font-size: 10px; color: #8f8a9e; margin-top: 4px; }
+  .subject-numbers { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 24px 0 10px; }
+  .subject-numbers strong { font-size: 21px; }
+  .subject-numbers span { color: #9994a9; font-size: 10px; }
+  .progress { height: 6px; background: #292631; border-radius: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 20px; }
+  .subject-footer { display: flex; justify-content: space-between; margin-top: 13px; color: #a09bae; font-size: 10px; }
+  .bottom-grid { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(270px,1fr); gap: 16px; margin-top: 24px; }
+  .task-row { display: flex; align-items: center; gap: 11px; padding: 13px 0; border-bottom: 1px solid #272530; }
+  .task-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .check-btn { width: 22px; height: 22px; flex-shrink: 0; border: 1px solid #4a455a; border-radius: 7px; background: #17151e; color: white; display: grid; place-items: center; }
+  .check-btn.checked { background: #7c3aed; border-color: #a78bfa; }
+  .task-name { font-size: 12px; font-weight: 650; }
+  .task-meta { color: #8e899e; font-size: 10px; margin-top: 4px; }
+  .task-done { text-decoration: line-through; color: #777386; }
+  .focus-card { border: 1px solid #44335d; border-radius: 15px; padding: 18px; background: radial-gradient(ellipse at 100% 0%, #7c3aed25, transparent 60%), #17131f; }
+  .focus-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: #8b5cf625; color: #c4b5fd; }
+  .focus-title { font-size: 14px; font-weight: 800; margin: 14px 0 7px; }
+  .focus-card p { color: #a7a0b7; font-size: 11px; line-height: 1.7; }
+  .focus-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 15px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #3b3449; background: #211a2b; color: #c4b5fd; border-radius: 999px; padding: 6px 9px; font-size: 10px; }
+  .countdown-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+  .countdown { border: 1px solid #2a2834; background: #121117; border-radius: 14px; padding: 14px; }
+  .countdown-label { font-size: 10px; color: #a6a0b4; }
+  .countdown-value { font-size: 20px; font-weight: 850; margin-top: 8px; }
+  .countdown-note { font-size: 9px; color: #7f7a91; margin-top: 5px; }
+  .page-footer { border-top: 1px solid #25232d; margin-top: 35px; padding: 18px 0; color: #777386; font-size: 10px; display: flex; justify-content: space-between; gap: 10px; }
+  .placeholder {
+    min-height: 55vh; display: grid; place-items: center; text-align: center;
+    border: 1px solid #292733; border-radius: 20px; margin-top: 28px;
+    padding: 30px; background: radial-gradient(ellipse at top, #7c3aed15, transparent 65%), #101015;
+  }
+  .placeholder-icon { width: 62px; height: 62px; border-radius: 19px; display: grid; place-items: center; margin: 0 auto 18px; background: #8b5cf620; color: #c4b5fd; }
+  .mobile-menu { display: none; }
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .subject-grid { grid-template-columns: 1fr; }
+    .subject-card { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12px; }
+    .subject-numbers { margin: 0; }
+    .subject-card .progress, .subject-footer { grid-column: 1 / -1; }
+  }
+  @media (max-width: 760px) {
+    .sidebar { width: 260px; transform: translateX(-100%); transition: transform .25s ease; box-shadow: 20px 0 60px #0008; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .topbar { height: 64px; padding: 0 16px; }
+    .mobile-menu { display: grid; }
+    .searchbox { display: none; }
+    .content { padding: 23px 16px 16px; }
+    .hero { padding: 21px; }
+    .stats-grid { gap: 10px; }
+    .panel { padding: 14px; }
+    .stat-value { font-size: 22px; }
+    .bottom-grid { grid-template-columns: 1fr; }
+    .countdown-grid { gap: 8px; }
+    .countdown { padding: 11px; }
+    .countdown-value { font-size: 17px; }
+    .page-footer { flex-direction: column; }
+  }
+  @media (max-width: 390px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .hero h2 { font-size: 23px; }
+    .countdown-grid { grid-template-columns: 1fr; }
+  }
+`;
+
+function AppStyles() {
+  return <style>{styles}</style>;
+}
+
+function AppShell() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const pageName =
+    navigation.find((item) => item.path === location.pathname)?.label ??
+    (location.pathname === "/profile"
+      ? "Profile"
+      : location.pathname === "/settings"
+        ? "Settings"
+        : "Dashboard");
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePointer = (event: MouseEvent) => {
+      document.documentElement.style.setProperty("--pointer-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--pointer-y", `${event.clientY}px`);
+    };
+    window.addEventListener("mousemove", handlePointer);
+    return () => window.removeEventListener("mousemove", handlePointer);
+  }, []);
+
+  return (
+    <div className="app">
+      <AppStyles />
+      <div
+        className="glow"
+        style={{
+          left: "var(--pointer-x, 70%)",
+          top: "var(--pointer-y, 20%)",
+        }}
+      />
+      <div className="layout">
+        {menuOpen && (
+          <button
+            aria-label="Close menu overlay"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 15,
+              background: "#0009",
+              border: 0,
+            }}
+          />
+        )}
+
+        <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
+          <NavLink to="/dashboard" className="brand" aria-label="JEE 360 dashboard">
+            <div className="brand-mark">
+              <GraduationCap size={24} />
+            </div>
+            <div>
+              <div className="brand-name">JEE 360</div>
+              <div className="brand-caption">Your preparation universe</div>
+            </div>
+          </NavLink>
+
+          <div className="nav-caption">LEARNING SPACE</div>
+          <nav className="nav-list">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `nav-link ${isActive ? "active" : ""}`
+                  }
+                >
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                  {item.path === "/ai-teacher" && (
+                    <Sparkles size={13} style={{ marginLeft: "auto" }} />
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
+
+          <div className="nav-caption" style={{ marginTop: 24 }}>
+            PERSONAL
+          </div>
+          <nav className="nav-list">
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
+            >
+              <UserRound size={18} />
+              <span>My Profile</span>
+            </NavLink>
+            <NavLink
+              to="/settings"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active" : ""}`
+              }
+            >
+              <Settings size={18} />
+              <span>Settings</span>
+            </NavLink>
+          </nav>
+
+          <div className="side-bottom">
+            <div className="focus-card" style={{ padding: 14, marginTop: 24 }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <Flame size={18} color="#fbbf77" />
+                <strong style={{ fontSize: 12 }}>Keep showing up</strong>
+              </div>
+              <p style={{ marginBottom: 0 }}>
+                Small daily steps build stronger preparation.
+              </p>
+            </div>
+            <div className="profile-mini">
+              <div className="avatar">S</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="profile-name">Student</div>
+                <div className="profile-role">Your learning journey</div>
+              </div>
+              <MoreHorizontal size={17} color="#898499" />
+            </div>
+          </div>
+        </aside>
+
+        <main className="main">
+          <header className="topbar">
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button
+                className="icon-btn mobile-menu"
+                aria-label="Open menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu size={19} />
+              </button>
+              <div className="crumb">
+                JEE 360 <span style={{ color: "#625e70" }}> / </span>{" "}
+                <strong>{pageName}</strong>
+              </div>
+            </div>
+            <div className="top-actions">
+              <div className="searchbox">
+                <Search size={15} />
+                <span>Search your learning space</span>
+                <span style={{ marginLeft: "auto", color: "#666174" }}>⌘ K</span>
+              </div>
+              <button
+                className="icon-btn"
+                aria-label="Notifications"
+                onClick={() => window.alert("Notifications will be available in a future update.")}
+              >
+                <Bell size={17} />
+              </button>
+              <button
+                className="icon-btn"
+                aria-label="Help"
+                onClick={() => window.alert("Help and support will be available in a future update.")}
+              >
+                <CircleHelp size={17} />
+              </button>
+            </div>
+          </header>
+
+          <div className="content">
+            <Outlet />
+            <footer className="page-footer">
+              <span>© {new Date().getFullYear()} JEE 360 · Created by Ghazi Abbas</span>
+              <span>Learn with purpose. Improve every day.</span>
+            </footer>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  note,
+  color,
+  background,
+}: {
+  icon: typeof Clock3;
+  label: string;
+  value: string;
+  note: string;
+  color: string;
+  background: string;
+}) {
+  return (
+    <div className="panel">
+      <div className="stat-top">
+        <div className="stat-icon" style={{ color, background }}>
+          <Icon size={19} />
+        </div>
+        <MoreHorizontal size={17} color="#777386" />
+      </div>
+      <div className="stat-label">{label}</div>
+      <div className="stat-value">{value}</div>
+      <div className="stat-note">{note}</div>
+    </div>
+  );
 }
 
 function Dashboard() {
-  const [completedTasks, setCompletedTasks] = useState<string[]>([
-    'Laws of Motion',
-  ])
+  const navigate = useNavigate();
+  const [tasks, setTasks] = useState([
+    { id: 1, name: "Revise Laws of Motion", meta: "Physics · 25 min", done: false },
+    { id: 2, name: "Practice Mole Concept", meta: "Chemistry · 30 min", done: false },
+    { id: 3, name: "Solve 10 algebra questions", meta: "Mathematics · 20 min", done: false },
+  ]);
 
-  const toggleTask = (title: string) => {
-    setCompletedTasks((current) =>
-      current.includes(title)
-        ? current.filter((task) => task !== title)
-        : [...current, title],
-    )
-  }
-
-  const goTo = (path: string) => {
-    window.location.href = path
-  }
+  const doneCount = tasks.filter((task) => task.done).length;
 
   return (
-    <div className="dashboard-page">
-      <section className="welcome-row">
-        <div>
-          <div className="eyebrow">
-            <Sparkles size={14} />
-            YOUR NEXT LEVEL STARTS HERE
-          </div>
+    <>
+      <div className="eyebrow">
+        <Sparkles size={14} /> YOUR NEXT LEVEL STARTS HERE
+      </div>
+      <h1 className="page-title">Welcome to your learning space.</h1>
+      <p className="muted">
+        Make today count. Build your concepts, practise consistently, and track your progress.
+      </p>
 
-          <h1>
-            Make today <span>count.</span>
-          </h1>
-
-          <p className="page-subtitle">
-            One focused session at a time. You’ve got this.
-          </p>
-        </div>
-
-        <Button
-          variant="secondary"
-          icon={<CalendarDays size={17} />}
-          onClick={() =>
-            window.alert(
-              'The study planner will be added in a future phase.',
-            )
-          }
-        >
-          Study planner
-        </Button>
-      </section>
-
-      <section className="hero-panel">
-        <div className="hero-orb hero-orb--one" />
-        <div className="hero-orb hero-orb--two" />
-
+      <section className="hero">
         <div className="hero-content">
-          <Badge tone="purple">YOUR DAILY MISSION</Badge>
-
-          <h2>
-            Progress beats
-            <br />
-            <span>perfection.</span>
-          </h2>
-
+          <div className="eyebrow">
+            <Zap size={14} /> YOUR DAILY MISSION
+          </div>
+          <h2>One focused session can change your day.</h2>
           <p>
-            Show up, stay curious, and keep moving forward.
-            Your preparation is built one good day at a time.
+            Pick up where you left off, strengthen your weak topics, and take
+            one step closer to your target exam.
           </p>
-
-          <div className="hero-actions">
-            <Button
-              icon={<Play size={16} fill="currentColor" />}
-              onClick={() => goTo('/lecture')}
-            >
-              Continue learning
-            </Button>
-
-            <span className="hero-caption">
-              <Zap size={14} />
-              Focus on your next step
-            </span>
-          </div>
-        </div>
-
-        <div className="hero-visual" aria-hidden="true">
-          <div className="hero-visual__ring hero-visual__ring--outer" />
-          <div className="hero-visual__ring hero-visual__ring--inner" />
-
-          <div className="hero-visual__core">
-            <GraduationCap size={47} strokeWidth={1.4} />
-          </div>
-
-          <span className="orbit-dot orbit-dot--one" />
-          <span className="orbit-dot orbit-dot--two" />
-          <span className="orbit-dot orbit-dot--three" />
-
-          <div className="floating-chip floating-chip--top">
-            <Sparkles size={14} />
-            Keep going
-          </div>
-
-          <div className="floating-chip floating-chip--bottom">
-            <Target size={14} />
-            One goal at a time
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="stats-grid"
-        aria-label="Learning overview"
-      >
-        <Card className="stat-card">
-          <div className="stat-card__top">
-            <span className="stat-icon stat-icon--purple">
-              <BookOpen size={18} />
-            </span>
-            <span className="stat-trend">
-              <ArrowUpRight size={14} />
-              TRACK
-            </span>
-          </div>
-
-          <p className="stat-label">Syllabus progress</p>
-          <div className="stat-value">
-            — <span>to be synced</span>
-          </div>
-          <p className="stat-footnote">
-            Connect your existing tracker in a later step.
-          </p>
-        </Card>
-
-        <Card className="stat-card">
-          <div className="stat-card__top">
-            <span className="stat-icon stat-icon--blue">
-              <Clock3 size={18} />
-            </span>
-            <span className="stat-trend">DAILY GOAL</span>
-          </div>
-
-          <p className="stat-label">Study time</p>
-          <div className="stat-value">
-            — <span>minutes</span>
-          </div>
-          <p className="stat-footnote">
-            Study-session tracking is not connected yet.
-          </p>
-        </Card>
-
-        <Card className="stat-card">
-          <div className="stat-card__top">
-            <span className="stat-icon stat-icon--orange">
-              <Flame size={18} />
-            </span>
-            <span className="stat-trend">CONSISTENCY</span>
-          </div>
-
-          <p className="stat-label">Study streak</p>
-          <div className="stat-value">
-            — <span>days</span>
-          </div>
-          <p className="stat-footnote">
-            Streaks will use verified activity.
-          </p>
-        </Card>
-
-        <Card className="stat-card">
-          <div className="stat-card__top">
-            <span className="stat-icon stat-icon--green">
-              <Trophy size={18} />
-            </span>
-            <span className="stat-trend">GAMIFICATION</span>
-          </div>
-
-          <p className="stat-label">XP &amp; rank</p>
-          <div className="stat-value">
-            — <span>not assigned</span>
-          </div>
-          <p className="stat-footnote">
-            No fake rank or XP is shown.
-          </p>
-        </Card>
-      </section>
-
-      <section className="content-grid">
-        <div className="content-column">
-          <div className="section-heading">
-            <div>
-              <div className="eyebrow">YOUR PREPARATION</div>
-              <h2>Subject overview</h2>
-            </div>
-
-            <button
-              className="text-link"
-              onClick={() => goTo('/analytics')}
-            >
-              View analytics
-              <ArrowRight size={15} />
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20 }}>
+            <button className="button-primary" onClick={() => navigate("/lecture")}>
+              <Play size={15} fill="currentColor" /> Continue learning
+            </button>
+            <button className="button-secondary" onClick={() => navigate("/test")}>
+              <Target size={15} /> Practice a test
             </button>
           </div>
-
-          <div className="subject-grid">
-            {subjects.map((subject) => {
-              const Icon = subject.icon
-
-              return (
-                <Card
-                  key={subject.name}
-                  className={`subject-card ${subject.className}`}
-                >
-                  <div className="subject-card__head">
-                    <div className="subject-icon">
-                      <Icon size={21} />
-                    </div>
-
-                    <button
-                      className="icon-button"
-                      aria-label={`More options for ${subject.name}`}
-                      onClick={() =>
-                        window.alert(
-                          `${subject.name} details will be connected later.`,
-                        )
-                      }
-                    >
-                      <MoreHorizontal size={19} />
-                    </button>
-                  </div>
-
-                  <h3>{subject.name}</h3>
-                  <p className="subject-subtitle">
-                    {subject.subtitle}
-                  </p>
-
-                  <div className="subject-progress-label">
-                    <span>Sample progress preview</span>
-                    <strong>{subject.progress}%</strong>
-                  </div>
-
-                  <ProgressBar
-                    value={subject.progress}
-                    showValue={false}
-                  />
-
-                  <div className="subject-card__bottom">
-                    <span>
-                      {subject.completed} / {subject.total} topics
-                    </span>
-                    <ArrowUpRight size={16} />
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
-
-          <Card className="insight-card">
-            <div className="insight-icon">
-              <BrainCircuit size={22} />
-            </div>
-
-            <div className="insight-copy">
-              <Badge tone="blue">COMING NEXT</Badge>
-
-              <h3>Your personal learning insights</h3>
-
-              <p>
-                Once your own study data is connected, JEE 360 can
-                help identify weak topics and suggest what to revise
-                next.
-              </p>
-            </div>
-
-            <ArrowRight
-              className="insight-arrow"
-              size={19}
-            />
-          </Card>
         </div>
-
-        <aside className="right-column">
-          <Card className="tasks-card">
-            <div className="section-heading section-heading--compact">
-              <div>
-                <div className="eyebrow">MAKE IT HAPPEN</div>
-                <h2>Daily checklist</h2>
-              </div>
-
-              <span className="checklist-count">
-                {completedTasks.length}/{initialTasks.length}
-              </span>
-            </div>
-
-            <ProgressBar
-              value={
-                (completedTasks.length / initialTasks.length) * 100
-              }
-              showValue={false}
-            />
-
-            <div className="task-list">
-              {initialTasks.map((task) => {
-                const isDone = completedTasks.includes(task.title)
-
-                return (
-                  <button
-                    key={task.title}
-                    className={`task-item ${
-                      isDone ? 'task-item--done' : ''
-                    }`}
-                    aria-pressed={isDone}
-                    onClick={() => toggleTask(task.title)}
-                  >
-                    <span className="task-check">
-                      {isDone && <CheckCircle2 size={18} />}
-                    </span>
-
-                    <span className="task-copy">
-                      <strong>{task.title}</strong>
-                      <span>
-                        {task.subject} · {task.time}
-                      </span>
-                    </span>
-
-                    {isDone && (
-                      <span className="task-done-label">
-                        DONE
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            <Button
-              variant="secondary"
-              className="full-width"
-              icon={<Plus size={16} />}
-              onClick={() =>
-                window.alert(
-                  'Custom tasks will be saved when the study planner is built.',
-                )
-              }
-            >
-              Add a task
-            </Button>
-          </Card>
-
-          <Card className="focus-card-main">
-            <div className="focus-card-main__top">
-              <div className="stat-icon stat-icon--purple">
-                <Zap size={18} />
-              </div>
-
-              <Badge tone="green">A LITTLE EVERY DAY</Badge>
-            </div>
-
-            <h3>Protect your focus.</h3>
-
-            <p>
-              Try one distraction-free study block. Consistency is
-              a skill you can train.
-            </p>
-
-            <div className="focus-quote">
-              <span>“</span>
-              The secret is to begin.
-            </div>
-          </Card>
-
-          <Card className="exam-note">
-            <div className="exam-note__icon">
-              <CalendarDays size={19} />
-            </div>
-
-            <div>
-              <strong>Exam countdowns</strong>
-              <p>
-                Official dates will be configurable after verification.
-              </p>
-            </div>
-          </Card>
-        </aside>
       </section>
 
-      <footer className="page-footer">
-        <span>
-          JEE 360 <span className="footer-dot">·</span>
-          Built for your next chapter.
-        </span>
-
-        <span>Created by Ghazi Abbas</span>
-      </footer>
-    </div>
-  )
-}
-
-function PlaceholderPage({
-  title,
-  description,
-}: {
-  title: string
-  description: string
-}) {
-  return (
-    <div className="placeholder-page">
-      <div className="placeholder-art">
-        <div className="placeholder-art__glow" />
-        <Sparkles size={34} />
+      <div className="stats-grid">
+        <StatCard
+          icon={Clock3}
+          label="Study time today"
+          value="—"
+          note="Connect study tracking to see your time"
+          color="#a78bfa"
+          background="#a78bfa18"
+        />
+        <StatCard
+          icon={BookMarked}
+          label="Syllabus completed"
+          value="—"
+          note="Your actual syllabus progress will appear here"
+          color="#67e8c0"
+          background="#67e8c018"
+        />
+        <StatCard
+          icon={Flame}
+          label="Current streak"
+          value="—"
+          note="Daily activity tracking is not connected yet"
+          color="#fbbf77"
+          background="#fbbf7718"
+        />
+        <StatCard
+          icon={Trophy}
+          label="XP & rank"
+          value="—"
+          note="Rank will appear after verified tracking is enabled"
+          color="#f0abfc"
+          background="#f0abfc18"
+        />
       </div>
 
-      <Badge tone="purple">FOUNDATION PHASE</Badge>
-
-      <h1>{title}</h1>
-      <p>{description}</p>
-
-      <Card className="placeholder-note">
-        <div className="placeholder-note__icon">
-          <CheckCircle2 size={20} />
-        </div>
-
+      <div className="section-head">
         <div>
-          <strong>This route is ready for development.</strong>
-          <p>
-            Real features and student data will be connected in
-            later phases. This preview does not claim that the
-            feature is already operational.
-          </p>
+          <h3>Your subjects</h3>
+          <p>Sample progress preview · Not saved to your account</p>
         </div>
-      </Card>
-    </div>
-  )
+        <button className="text-link" onClick={() => navigate("/analytics")}>
+          View analytics <ChevronRight size={15} />
+        </button>
+      </div>
+
+      <div className="subject-grid">
+        {subjects.map((subject) => {
+          const Icon = subject.icon;
+          return (
+            <div className="panel subject-card" key={subject.name}>
+              <div className="subject-head">
+                <div
+                  className="subject-icon"
+                  style={{ background: subject.background, color: subject.color }}
+                >
+                  <Icon size={21} />
+                </div>
+                <div>
+                  <div className="subject-title">{subject.name}</div>
+                  <div className="subject-sub">{subject.subtitle}</div>
+                </div>
+              </div>
+              <div className="subject-numbers">
+                <strong>{subject.progress}%</strong>
+                <span>sample completion</span>
+              </div>
+              <div className="progress">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${subject.progress}%`,
+                    background: subject.color,
+                  }}
+                />
+              </div>
+              <div className="subject-footer">
+                <span>{subject.completed} / {subject.total} sample chapters</span>
+                <span style={{ color: subject.color }}>Preview</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bottom-grid">
+        <section className="panel">
+          <div className="section-head" style={{ marginTop: 0 }}>
+            <div>
+              <h3>Today's study checklist</h3>
+              <p>Tick items as you finish them. This checklist resets on refresh.</p>
+            </div>
+            <span className="pill">{doneCount}/{tasks.length} complete</span>
+          </div>
+          <div className="progress" style={{ marginBottom: 10 }}>
+            <div
+              className="progress-fill"
+              style={{
+                width: `${(doneCount / tasks.length) * 100}%`,
+                background: "linear-gradient(90deg,#8b5cf6,#c4b5fd)",
+              }}
+            />
+          </div>
+          {tasks.map((task) => (
+            <div className="task-row" key={task.id}>
+              <button
+                className={`check-btn ${task.done ? "checked" : ""}`}
+                aria-label={task.done ? "Mark task incomplete" : "Mark task complete"}
+                onClick={() =>
+                  setTasks((current) =>
+                    current.map((item) =>
+                      item.id === task.id ? { ...item, done: !item.done } : item
+                    )
+                  )
+                }
+              >
+                {task.done && <Check size={14} />}
+              </button>
+              <div style={{ flex: 1 }}>
+                <div className={`task-name ${task.done ? "task-done" : ""}`}>
+                  {task.name}
+                </div>
+                <div className="task-meta">{task.meta}</div>
+              </div>
+              <Clock3 size={15} color="#777386" />
+            </div>
+          ))}
+          <button
+            className="button-secondary"
+            style={{ marginTop: 18 }}
+            onClick={() =>
+              window.alert("Custom study plans will be available in a future update.")
+            }
+          >
+            <Plus size={15} /> Add a task
+          </button>
+        </section>
+
+        <div style={{ display: "grid", gap: 15, alignContent: "start" }}>
+          <section className="focus-card">
+            <div className="focus-icon"><Brain size={22} /></div>
+            <div className="focus-title">Your AI study companion</div>
+            <p>
+              Get help understanding concepts and planning your next study
+              session. AI integration is not connected yet.
+            </p>
+            <button className="button-primary" onClick={() => navigate("/ai-teacher")}>
+              Explore AI Teacher <ChevronRight size={15} />
+            </button>
+          </section>
+
+          <section className="panel">
+            <div className="section-head" style={{ marginTop: 0 }}>
+              <div>
+                <h3>Exam countdowns</h3>
+                <p>Official dates need to be configured before countdowns appear.</p>
+              </div>
+              <CalendarDays size={18} color="#a78bfa" />
+            </div>
+            <div className="countdown-grid">
+              <div className="countdown">
+                <div className="countdown-label">JEE Main</div>
+                <div className="countdown-value">—</div>
+                <div className="countdown-note">Date not configured</div>
+              </div>
+              <div className="countdown">
+                <div className="countdown-label">JEE Advanced</div>
+                <div className="countdown-value">—</div>
+                <div className="countdown-note">Date not configured</div>
+              </div>
+              <div className="countdown">
+                <div className="countdown-label">NEET UG</div>
+                <div className="countdown-value">—</div>
+                <div className="countdown-note">Date not configured</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
+
+const placeholderDetails: Record<
+  string,
+  { title: string; description: string; icon: typeof BookOpen }
+> = {
+  "/lecture": {
+    title: "Lectures",
+    description: "Your chapter-wise lessons, video player, and lecture progress will live here.",
+    icon: Play,
+  },
+  "/group": {
+    title: "Study Group",
+    description: "Connect with other learners, share goals, and practise together.",
+    icon: Users,
+  },
+  "/test": {
+    title: "Test Centre",
+    description: "Chapter tests, DPPs, PYQs, mock exams, and detailed result analysis.",
+    icon: Target,
+  },
+  "/books": {
+    title: "Books & Notes",
+    description: "Read your study materials, PDFs, notes, and bookmarked pages.",
+    icon: BookOpen,
+  },
+  "/analytics": {
+    title: "Analytics",
+    description: "Understand your syllabus progress, test accuracy, study habits, and weak topics.",
+    icon: BarChart3,
+  },
+  "/ai-teacher": {
+    title: "AI Teacher",
+    description: "A dedicated place for concept explanations and personalised study assistance. AI is not connected yet.",
+    icon: Brain,
+  },
+  "/settings": {
+    title: "Settings",
+    description: "Account preferences, privacy controls, appearance, and notification settings.",
+    icon: Settings,
+  },
+  "/profile": {
+    title: "My Profile",
+    description: "Your student profile, exam target, and learning achievements.",
+    icon: UserRound,
+  },
+};
+
+function PlaceholderPage({ path }: { path: string }) {
+  const navigate = useNavigate();
+  const details = placeholderDetails[path] ?? {
+    title: "Page not found",
+    description: "This page does not exist yet. Return to your dashboard to continue.",
+    icon: CircleHelp,
+  };
+  const Icon = details.icon;
+
+  return (
+    <>
+      <div className="eyebrow"><Sparkles size={14} /> JEE 360 WORKSPACE</div>
+      <h1 className="page-title">{details.title}</h1>
+      <p className="muted">{details.description}</p>
+      <div className="placeholder">
+        <div>
+          <div className="placeholder-icon"><Icon size={28} /></div>
+          <h2 style={{ fontSize: 21, margin: "0 0 10px" }}>
+            {details.title} is being prepared
+          </h2>
+          <p className="muted" style={{ maxWidth: 450, margin: "0 auto 22px" }}>
+            This screen is a starter page. The complete feature, saved data, and
+            account integration will be added in the next development steps.
+          </p>
+          <button className="button-primary" onClick={() => navigate("/dashboard")}>
+            <Home size={15} /> Back to dashboard
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default function App() {
-  const location = useLocation()
-
-  const [pointer, setPointer] = useState({
-    x: 50,
-    y: 25,
-  })
-
-  useEffect(() => {
-    const onPointerMove = (event: PointerEvent) => {
-      setPointer({
-        x: (event.clientX / window.innerWidth) * 100,
-        y: (event.clientY / window.innerHeight) * 100,
-      })
-    }
-
-    window.addEventListener('pointermove', onPointerMove, {
-      passive: true,
-    })
-
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove)
-    }
-  }, [])
-
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'auto',
-    })
-  }, [location.pathname])
-
   return (
-    <div
-      className="app-root"
-      style={
-        {
-          '--pointer-x': `${pointer.x}%`,
-          '--pointer-y': `${pointer.y}%`,
-        } as CSSProperties
-      }
-    >
-      <div className="ambient-glow" aria-hidden="true" />
-
-      <Routes>
-        <Route
-          path="/"
-          element={<Navigate to="/dashboard" replace />}
-        />
-
-        <Route element={<AppShell />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {Object.entries(pageDetails).map(([path, details]) => (
-            <Route
-              key={path}
-              path={path}
-              element={
-                <PlaceholderPage
-                  title={details.title}
-                  description={details.description}
-                />
-              }
-            />
-          ))}
-
-          <Route
-            path="*"
-            element={
-              <PlaceholderPage
-                title="Page not found"
-                description="This page does not exist in the current foundation."
-              />
-            }
-          />
-        </Route>
-      </Routes>
-    </div>
-  )
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route element={<AppShell />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/lecture" element={<PlaceholderPage path="/lecture" />} />
+        <Route path="/group" element={<PlaceholderPage path="/group" />} />
+        <Route path="/test" element={<PlaceholderPage path="/test" />} />
+        <Route path="/books" element={<PlaceholderPage path="/books" />} />
+        <Route path="/analytics" element={<PlaceholderPage path="/analytics" />} />
+        <Route path="/ai-teacher" element={<PlaceholderPage path="/ai-teacher" />} />
+        <Route path="/settings" element={<PlaceholderPage path="/settings" />} />
+        <Route path="/profile" element={<PlaceholderPage path="/profile" />} />
+        <Route path="*" element={<PlaceholderPage path="/not-found" />} />
+      </Route>
+    </Routes>
+  );
 }

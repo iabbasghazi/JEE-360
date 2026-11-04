@@ -1020,10 +1020,9 @@ export default function App() {
           ) : profileComplete ? (
             <Navigate to="/dashboard" replace />
           ) : (
-            <ProfileSetup
-              userId={session.user.id}
-              onComplete={() => setProfileComplete(true)}
-            />
+           <ProfileSetup
+  onComplete={...}
+/>
           )
         }
       />

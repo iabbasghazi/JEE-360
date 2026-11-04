@@ -9,7 +9,6 @@ import {
   Clock3,
   Flame,
   FlaskConical,
-  GraduationCap,
   Home,
   Menu,
   MoreHorizontal,
@@ -133,10 +132,25 @@ const styles = `
   }
   .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 28px; }
   .brand-mark {
-    width: 42px; height: 42px; border-radius: 14px;
+    width: 42px; height: 42px; flex: 0 0 42px;
+    border-radius: 14px; overflow: hidden;
     display: grid; place-items: center;
-    background: linear-gradient(145deg, #a78bfa, #6d28d9);
-    color: white; box-shadow: 0 6px 28px #7c3aed33;
+    background: #ffffff;
+    border: 1px solid rgba(196, 181, 253, .9);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, .12),
+      0 0 20px rgba(124, 58, 237, .28),
+      0 4px 14px rgba(0, 0, 0, .28);
+    transition: box-shadow .22s ease, transform .22s ease;
+  }
+  .brand:hover .brand-mark {
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, .16),
+      0 0 26px rgba(167, 139, 250, .42),
+      0 4px 14px rgba(0, 0, 0, .3);
+    transform: translateY(-1px);
+  }
+  .brand-mark img {
+    display: block; width: 100%; height: 100%;
+    object-fit: contain; border-radius: 12px;
   }
   .brand-name { font-size: 17px; font-weight: 850; letter-spacing: 1.6px; }
   .brand-caption { font-size: 11px; color: #9290a3; margin-top: 3px; }
@@ -375,7 +389,14 @@ function AppShell() {
         <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
           <NavLink to="/dashboard" className="brand" aria-label="JEE 360 dashboard">
             <div className="brand-mark">
-              <GraduationCap size={24} />
+              <img
+                src="https://i.postimg.cc/m2PRngnY/logo512-png.png"
+                alt="Ghazi Abbas logo"
+                width={42}
+                height={42}
+                loading="eager"
+                decoding="async"
+              />
             </div>
             <div>
               <div className="brand-name">JEE 360</div>

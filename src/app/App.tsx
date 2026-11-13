@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
@@ -498,7 +497,10 @@ function AppShell() {
                 <span>Search your learning space</span>
                 <span style={{ marginLeft: "auto", color: "#666174" }}>⌘ K</span>
               </div>
-              <button
+
+
+
+                            <button
                 className="icon-btn"
                 aria-label="Notifications"
                 onClick={() => window.alert("Notifications will be available in a future update.")}

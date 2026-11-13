@@ -29,9 +29,11 @@ import {
   BarChart3,
   CalendarDays,
   Atom,
+  ArrowRight,
   Calculator,
   BookMarked,
   Bell,
+  GraduationCap,
 } from "lucide-react";
 import {
   Navigate,
@@ -929,6 +931,217 @@ function ProtectedAppShell({
   return <AppShell />;
 }
 
+
+function LandingPage() {
+  const navigate = useNavigate();
+
+  const features = [
+    { icon: Target, title: "Smart Dashboard", text: "Track your syllabus, study goals, streaks and exam preparation in one place." },
+    { icon: Brain, title: "AI Teacher", text: "Get concept explanations, doubt support and study guidance when you need it." },
+    { icon: BookOpen, title: "Lectures & Study Material", text: "Keep lessons, notes, books, DPPs and chapter resources organised." },
+    { icon: Trophy, title: "Tests & Performance", text: "Practise questions, review mistakes and understand where to improve." },
+    { icon: BarChart3, title: "Learning Analytics", text: "See your progress, identify weak topics and plan your next revision." },
+    { icon: Users, title: "Study Groups", text: "Stay motivated with shared goals, study communities and friendly competition." },
+  ];
+
+  const faqs = [
+    ["Who can use JEE 360?", "JEE 360 is designed for Class 11, Class 12 and dropper students preparing for JEE Main, JEE Advanced or NEET."],
+    ["Is JEE 360 free?", "The project is being built with a zero-cost approach. Some features may be introduced gradually as they are completed."],
+    ["How do I get started?", "Choose Continue with Google or Get Started, sign in securely, and complete your student profile."],
+    ["Can I use it on my phone?", "The landing page and learning workspace are designed to adapt to mobile, tablet and desktop screens."],
+  ];
+
+  return (
+    <div className="landing-page">
+      <style>{`
+        .landing-page, .landing-page * { box-sizing: border-box; }
+        .landing-page {
+          min-height: 100vh; overflow: hidden; background: #07070a; color: #f7f4ff;
+          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          position: relative; isolation: isolate;
+        }
+        .landing-page:before, .landing-page:after {
+          content: ""; position: absolute; pointer-events: none; z-index: -1; border-radius: 50%;
+          filter: blur(100px); opacity: .55;
+        }
+        .landing-page:before { width: 540px; height: 540px; top: -230px; left: -170px; background: #5425a8; }
+        .landing-page:after { width: 520px; height: 520px; top: 380px; right: -300px; background: #32106f; }
+        .lp-wrap { width: min(1160px, calc(100% - 44px)); margin: 0 auto; }
+        .lp-nav { height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #ffffff12; }
+        .lp-brand { display: flex; align-items: center; gap: 12px; }
+        .lp-logo { width: 43px; height: 43px; border-radius: 14px; display: grid; place-items: center; color: white; background: linear-gradient(145deg,#a78bfa,#5b21b6); box-shadow: 0 0 32px #8b5cf64d; }
+        .lp-brand strong { display: block; font-size: 17px; letter-spacing: 1.6px; font-weight: 900; }
+        .lp-brand small { display: block; margin-top: 3px; color: #a49bb7; font-size: 9px; letter-spacing: 2px; }
+        .lp-navlinks { display: flex; align-items: center; gap: 27px; color: #b7b1c5; font-size: 12px; }
+        .lp-navlinks a { text-decoration: none; color: inherit; transition: color .2s; }
+        .lp-navlinks a:hover { color: white; }
+        .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 1px solid transparent; border-radius: 13px; padding: 13px 18px; font-size: 12px; font-weight: 800; cursor: pointer; transition: transform .2s, box-shadow .2s, border-color .2s; }
+        .lp-btn:hover { transform: translateY(-2px); }
+        .lp-btn-primary { color: white; background: linear-gradient(110deg,#8b5cf6,#6d28d9); box-shadow: 0 10px 30px #7c3aed40; }
+        .lp-btn-primary:hover { box-shadow: 0 14px 38px #7c3aed66; }
+        .lp-btn-secondary { color: #eee9ff; background: #ffffff08; border-color: #ffffff22; }
+        .lp-btn-secondary:hover { border-color: #a78bfa88; }
+        .lp-hero { min-height: 660px; display: grid; grid-template-columns: 1.08fr .92fr; align-items: center; gap: 40px; padding: 76px 0 85px; }
+        .lp-kicker { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #a78bfa44; border-radius: 99px; color: #d2c3ff; background: #8b5cf615; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; }
+        .lp-hero h1 { max-width: 680px; margin: 22px 0 18px; font-size: clamp(43px,6.5vw,76px); line-height: 1.02; letter-spacing: -3.6px; font-weight: 900; }
+        .lp-gradient { color: #c4b5fd; background: linear-gradient(95deg,#e9ddff,#a78bfa 55%,#8b5cf6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .lp-lead { max-width: 570px; color: #aaa4b8; font-size: 15px; line-height: 1.9; }
+        .lp-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+        .lp-trust { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 24px; color: #8e879e; font-size: 10px; }
+        .lp-trust span { display: inline-flex; align-items: center; gap: 6px; }
+        .lp-trust svg { color: #b9a3ff; }
+        .lp-visual { position: relative; min-height: 440px; display: grid; place-items: center; perspective: 1000px; }
+        .lp-orbit { position: absolute; width: min(430px,90%); aspect-ratio: 1; border: 1px solid #a78bfa25; border-radius: 50%; box-shadow: 0 0 0 34px #a78bfa08, 0 0 0 70px #a78bfa05; animation: lp-orbit 24s linear infinite; }
+        .lp-orbit:before, .lp-orbit:after { content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; background: #c4b5fd; box-shadow: 0 0 22px #a78bfa; }
+        .lp-orbit:before { top: 13%; left: 17%; } .lp-orbit:after { bottom: 17%; right: 12%; }
+        .lp-dashboard { width: min(420px,100%); padding: 21px; border: 1px solid #ffffff25; border-radius: 25px; background: linear-gradient(145deg,#211a31eF,#111017f5); box-shadow: 0 35px 100px #000a, 0 0 65px #7c3aed20; transform: rotateY(-12deg) rotateX(5deg); animation: lp-float 6s ease-in-out infinite; backdrop-filter: blur(18px); }
+        .lp-dash-top { display: flex; align-items: center; justify-content: space-between; color: #aaa3b9; font-size: 10px; }
+        .lp-dash-title { font-size: 20px; font-weight: 850; margin: 20px 0 5px; }
+        .lp-dash-sub { color: #928ba2; font-size: 10px; }
+        .lp-progress-card { margin-top: 19px; padding: 15px; border: 1px solid #ffffff12; border-radius: 15px; background: #ffffff07; }
+        .lp-progress-row { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #c9c2d5; }
+        .lp-bar { height: 7px; margin-top: 11px; background: #ffffff13; border-radius: 20px; overflow: hidden; }
+        .lp-bar span { display: block; height: 100%; width: 68%; border-radius: inherit; background: linear-gradient(90deg,#7c3aed,#c4b5fd); }
+        .lp-mini-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 11px; }
+        .lp-mini { padding: 14px; border: 1px solid #ffffff12; border-radius: 14px; background: #ffffff07; }
+        .lp-mini small { color: #9c95aa; font-size: 9px; }
+        .lp-mini strong { display: block; margin-top: 8px; font-size: 19px; }
+        .lp-float-tag { position: absolute; padding: 12px 15px; border: 1px solid #ffffff22; border-radius: 14px; background: #171321eF; box-shadow: 0 15px 35px #0008; color: #dcd3f5; font-size: 10px; font-weight: 750; backdrop-filter: blur(12px); animation: lp-float 5s ease-in-out infinite; }
+        .lp-tag-one { top: 13%; right: -2%; } .lp-tag-two { bottom: 13%; left: -2%; animation-delay: -2s; }
+        @keyframes lp-float { 0%,100% { transform: translateY(0) rotateY(-12deg) rotateX(5deg); } 50% { transform: translateY(-12px) rotateY(-8deg) rotateX(3deg); } }
+        @keyframes lp-orbit { to { transform: rotate(360deg); } }
+        .lp-section { padding: 82px 0; }
+        .lp-section-head { max-width: 650px; margin: 0 auto 38px; text-align: center; }
+        .lp-section-head h2 { margin: 13px 0 10px; font-size: clamp(28px,4vw,43px); letter-spacing: -1.5px; }
+        .lp-section-head p { color: #a49daf; font-size: 13px; line-height: 1.8; }
+        .lp-feature-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+        .lp-feature { padding: 23px; border: 1px solid #ffffff14; border-radius: 19px; background: linear-gradient(145deg,#17151f,#0e0e13); transition: transform .22s,border-color .22s,box-shadow .22s; }
+        .lp-feature:hover { transform: translateY(-5px); border-color: #9b7aff77; box-shadow: 0 18px 40px #0005,0 0 30px #7c3aed12; }
+        .lp-feature-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 14px; color: #c4b5fd; background: #8b5cf622; }
+        .lp-feature h3 { margin: 19px 0 8px; font-size: 15px; }
+        .lp-feature p { margin: 0; color: #9992a7; font-size: 11px; line-height: 1.8; }
+        .lp-how { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+        .lp-step { padding: 22px; border: 1px solid #ffffff14; border-radius: 18px; background: #ffffff06; }
+        .lp-step b { color: #b9a3ff; font-size: 11px; letter-spacing: 1.5px; }
+        .lp-step h3 { margin: 12px 0 7px; font-size: 15px; }
+        .lp-step p { margin: 0; color: #9992a7; font-size: 11px; line-height: 1.8; }
+        .lp-audience { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .lp-chip { padding: 12px 17px; border: 1px solid #a78bfa35; border-radius: 99px; background: #8b5cf611; color: #d4c8f5; font-size: 12px; font-weight: 750; }
+        .lp-faq { max-width: 790px; margin: 0 auto; display: grid; gap: 10px; }
+        .lp-faq details { padding: 17px 19px; border: 1px solid #ffffff16; border-radius: 14px; background: #ffffff06; }
+        .lp-faq summary { cursor: pointer; font-size: 12px; font-weight: 750; }
+        .lp-faq p { margin: 12px 0 0; color: #a49daf; font-size: 11px; line-height: 1.8; }
+        .lp-final { margin: 35px 0 80px; padding: 55px 25px; text-align: center; border: 1px solid #9b7aff44; border-radius: 25px; background: radial-gradient(ellipse at 50% 0%,#7c3aed30,transparent 65%),linear-gradient(145deg,#171321,#0e0d13); }
+        .lp-final h2 { margin: 0 0 12px; font-size: clamp(27px,4vw,42px); letter-spacing: -1.3px; }
+        .lp-final p { color: #aaa3b8; font-size: 12px; margin: 0 0 23px; }
+        .lp-footer { padding: 24px 0 30px; border-top: 1px solid #ffffff12; display: flex; justify-content: space-between; gap: 15px; color: #817a90; font-size: 10px; }
+        @media(max-width:850px) { .lp-hero { grid-template-columns: 1fr; padding: 65px 0; text-align: center; } .lp-lead { margin: auto; } .lp-actions,.lp-trust { justify-content: center; } .lp-visual { min-height: 410px; } .lp-feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .lp-navlinks { display: none; } }
+        @media(max-width:560px) { .lp-wrap { width: min(100% - 30px,1160px); } .lp-nav { height: 70px; } .lp-nav > .lp-btn { padding: 10px 12px; font-size: 10px; } .lp-hero { min-height: auto; padding: 55px 0 65px; gap: 25px; } .lp-hero h1 { letter-spacing: -2px; } .lp-lead { font-size: 13px; } .lp-visual { min-height: 330px; } .lp-dashboard { padding: 16px; } .lp-tag-one { right: 0; top: 4%; } .lp-tag-two { left: 0; bottom: 4%; } .lp-feature-grid,.lp-how { grid-template-columns: 1fr; } .lp-section { padding: 58px 0; } .lp-final { margin-bottom: 55px; padding: 40px 18px; } .lp-footer { flex-direction: column; text-align: center; } }
+        @media(prefers-reduced-motion:reduce) { .lp-orbit,.lp-dashboard,.lp-float-tag { animation: none !important; } * { scroll-behavior: auto !important; } }
+      `}</style>
+
+      <div className="lp-wrap">
+        <nav className="lp-nav">
+          <div className="lp-brand">
+            <div className="lp-logo"><GraduationCap size={24} /></div>
+            <div><strong>JEE 360</strong><small>YOUR PREPARATION UNIVERSE</small></div>
+          </div>
+          <div className="lp-navlinks">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#who-its-for">Who it's for</a>
+            <a href="#faq">FAQ</a>
+          </div>
+          <button className="lp-btn lp-btn-primary" onClick={() => navigate("/login")}>Continue with Google <ArrowRight size={15} /></button>
+        </nav>
+
+        <section className="lp-hero">
+          <div>
+            <div className="lp-kicker"><Sparkles size={13} /> YOUR ALL-IN-ONE EXAM PREP SPACE</div>
+            <h1>Your dream deserves a <span className="lp-gradient">360° preparation.</span></h1>
+            <p className="lp-lead">One focused space for your lectures, practice, tests, progress and study planning. Build better habits, understand your preparation and keep moving towards your target.</p>
+            <div className="lp-actions">
+              <button className="lp-btn lp-btn-primary" onClick={() => navigate("/login")}>Continue with Google <ArrowRight size={16} /></button>
+              <button className="lp-btn lp-btn-secondary" onClick={() => navigate("/login")}>Get Started <ChevronRight size={16} /></button>
+            </div>
+            <div className="lp-trust">
+              <span><Check size={13} /> Made for JEE & NEET aspirants</span>
+              <span><Check size={13} /> Personal learning workspace</span>
+              <span><Check size={13} /> Mobile-friendly experience</span>
+            </div>
+          </div>
+
+          <div className="lp-visual" aria-label="Illustration of the JEE 360 student dashboard">
+            <div className="lp-orbit" />
+            <div className="lp-dashboard">
+              <div className="lp-dash-top"><span>JEE 360 / OVERVIEW</span><Sparkles size={15} color="#b9a3ff" /></div>
+              <div className="lp-dash-title">Your progress, in focus.</div>
+              <div className="lp-dash-sub">A clearer view of your preparation journey</div>
+              <div className="lp-progress-card">
+                <div className="lp-progress-row"><strong>Preparation overview</strong><span>Live workspace preview</span></div>
+                <div className="lp-bar"><span /></div>
+              </div>
+              <div className="lp-mini-grid">
+                <div className="lp-mini"><small>LEARNING</small><strong><BookOpen size={17} /> &nbsp;Lessons</strong></div>
+                <div className="lp-mini"><small>PRACTICE</small><strong><Target size={17} /> &nbsp;Tests</strong></div>
+                <div className="lp-mini"><small>GUIDANCE</small><strong><Brain size={17} /> &nbsp;AI Teacher</strong></div>
+                <div className="lp-mini"><small>INSIGHTS</small><strong><BarChart3 size={17} /> &nbsp;Analytics</strong></div>
+              </div>
+            </div>
+            <div className="lp-float-tag lp-tag-one"><Sparkles size={13} /> Study smarter, every day</div>
+            <div className="lp-float-tag lp-tag-two"><Flame size={14} color="#fbbf77" /> Build your consistency</div>
+          </div>
+        </section>
+
+        <section className="lp-section" id="features">
+          <div className="lp-section-head">
+            <div className="lp-kicker"><Zap size={13} /> ONE CONNECTED WORKSPACE</div>
+            <h2>Everything you need to <span className="lp-gradient">move forward.</span></h2>
+            <p>Bring the important parts of your preparation together instead of scattering your effort across different places.</p>
+          </div>
+          <div className="lp-feature-grid">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return <article className="lp-feature" key={feature.title}><div className="lp-feature-icon"><Icon size={21} /></div><h3>{feature.title}</h3><p>{feature.text}</p></article>;
+            })}
+          </div>
+        </section>
+
+        <section className="lp-section" id="how-it-works">
+          <div className="lp-section-head">
+            <div className="lp-kicker"><Sparkles size={13} /> SIMPLE TO BEGIN</div>
+            <h2>Your preparation, <span className="lp-gradient">one step at a time.</span></h2>
+          </div>
+          <div className="lp-how">
+            <article className="lp-step"><b>01 / SIGN IN</b><h3>Create your space</h3><p>Continue securely with your Google account to start your JEE 360 journey.</p></article>
+            <article className="lp-step"><b>02 / PERSONALISE</b><h3>Tell us about your goals</h3><p>Set your class, target exam, study routine and preparation preferences.</p></article>
+            <article className="lp-step"><b>03 / GET STARTED</b><h3>Follow your progress</h3><p>Use your learning workspace to plan, practise, review and improve consistently.</p></article>
+          </div>
+        </section>
+
+        <section className="lp-section" id="who-its-for">
+          <div className="lp-section-head"><div className="lp-kicker"><GraduationCap size={13} /> BUILT AROUND YOUR JOURNEY</div><h2>For every stage of <span className="lp-gradient">exam preparation.</span></h2><p>Choose your path and make your learning space work around your target.</p></div>
+          <div className="lp-audience"><span className="lp-chip">Class 11</span><span className="lp-chip">Class 12</span><span className="lp-chip">Dropper</span><span className="lp-chip">JEE Main</span><span className="lp-chip">JEE Advanced</span><span className="lp-chip">NEET</span></div>
+        </section>
+
+        <section className="lp-section" id="faq">
+          <div className="lp-section-head"><div className="lp-kicker"><CircleHelp size={13} /> GOOD TO KNOW</div><h2>Frequently asked <span className="lp-gradient">questions.</span></h2></div>
+          <div className="lp-faq">{faqs.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div>
+        </section>
+
+        <section className="lp-final">
+          <div className="lp-kicker"><Sparkles size={13} /> YOUR NEXT CHAPTER STARTS HERE</div>
+          <h2>Ready to take charge of your preparation?</h2>
+          <p>Set up your student profile and build a more focused learning routine.</p>
+          <button className="lp-btn lp-btn-primary" onClick={() => navigate("/login")}>Get Started <ArrowRight size={16} /></button>
+        </section>
+
+        <footer className="lp-footer"><span>© {new Date().getFullYear()} JEE 360. All rights reserved.</span><span>Created by Ghazi Abbas · Learn with purpose. Improve every day.</span></footer>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { session, loading } = useAuthSession();
 
@@ -984,6 +1197,21 @@ export default function App() {
         path="/"
         element={
           !session ? (
+            <LandingPage />
+          ) : profileLoading ? (
+            <AuthLoading message="Checking your profile..." />
+          ) : profileComplete ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/onboarding" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          !session ? (
             <Login />
           ) : profileLoading ? (
             <AuthLoading message="Checking your profile..." />
@@ -1020,9 +1248,9 @@ export default function App() {
           ) : profileComplete ? (
             <Navigate to="/dashboard" replace />
           ) : (
-           <ProfileSetup
-  onComplete={...}
-/>
+            <ProfileSetup
+              onComplete={() => setProfileComplete(true)}
+            />
           )
         }
       />
